@@ -18,8 +18,8 @@ macro "Zooming" {
 	// steps number for the zooming animation (total number of images in output stack)
 	step_def = 30;
 	// type of zoom
-	zoom_choice = newArray("linear", "logarithmic");
-	zoom_def = "linear";
+	zoom_choice = newArray("linear", "geometric", "quadratic");
+	zoom_def = "quadratic";
 	// type of interpolation
 	interp_choice = newArray("None", "Bilinear", "Bicubic");
 	interp_def = "None";
@@ -37,7 +37,7 @@ macro "Zooming" {
 	incenterX = inW /2;
 	incenterY = inH /2;
 	bd = bitDepth();
-	if (bd != 24) inType = bd + "-bit";
+	if (bd != 24) inType = "" + bd + "-bit";
 	else inType = "RGB";
 
 	// Check if rectangle ROI destination
@@ -88,7 +88,7 @@ macro "Zooming" {
 	Dialog.addCheckbox("Generate zoom box animation on original image", oriOut_def);
 	Dialog.addChoice("Scale original image to", oriScale_choice, oriScale_def);
 	Dialog.show();
-	step = Dialog.getNumber()-1;
+	step = Dialog.getNumber();
 	zoomtype = Dialog.getChoice();
 	outW = Dialog.getNumber();
 	outH = Math.round(startH * outW/startW);
@@ -100,7 +100,7 @@ macro "Zooming" {
 
 	// Prepare output stack
 	outTitle = inTitle + " zoom";
-	outSlices = step+1;
+	outSlices = step;
 	newImage(outTitle, inType + " black", outW, outH, outSlices);
 	outID = getImageID();
 	outTitle = getTitle();
@@ -151,11 +151,11 @@ macro "Zooming" {
 
 
 	i = 0;
-	for (p = 0; p < step+1 ; p++) {
+	for (p = 0; p < step ; p++) {
 
 		// progress bar
-		showStatus("processing image " + (p+1) + "/"+ step+1);
-		showProgress(p+1, step+1);
+		showStatus("processing image " + (p+1) + "/"+ step);
+		showProgress(p+1, step);
 
 		// iterate slice for output stacks
 		i++;
@@ -177,10 +177,30 @@ macro "Zooming" {
 			currY= currcenterY - currH/2;
 		}
 		// logarithmic progression
-		else {	
-			currScaleW = 1 - p * ((1 - destW/startW)/step);
-			currScaleX = 1 - p * ((1 - destcenterX/startcenterX)/step);
-			currScaleY = 1 - p * ((1 - destcenterY/startcenterY)/step);
+		else if  (zoomtype == "geometric") {
+			t = p/(step-1); // t varies lineraly from 0 to 1
+			s = t; // s is the easing function from 0 to 1
+			currScaleW = 1 - ((1 - destW/startW)*s); // currScale varies from 1 to ratio
+			currScaleX = 1 - ((1 - destcenterX/startcenterX)*s);
+			currScaleY = 1 - ((1 - destcenterY/startcenterY)*s);
+			
+			// width and height of the running rectangle
+			currW = startW * currScaleW;
+			currH = startH * currScaleW;
+			// center of the running rectangle
+			currcenterX = startcenterX * currScaleX;
+			currcenterY = startcenterY * currScaleY;
+			// upper left corner of the running rectangle
+			currX= currcenterX - currW/2;
+			currY= currcenterY - currH/2;
+		}
+		
+		else if  (zoomtype == "quadratic") {		
+			t = p/(step-1); // t varies lineraly from 0 to 1
+			s = 1 - ((1-t)*(1-t)); // s is the easing function from 0 to 1
+			currScaleW = 1 - ((1 - destW/startW)*s); // currScale varies from 1 to ratio
+			currScaleX = 1 - ((1 - destcenterX/startcenterX)*s);
+			currScaleY = 1 - ((1 - destcenterY/startcenterY)*s);
 			
 			// width and height of the running rectangle
 			currW = startW * currScaleW;

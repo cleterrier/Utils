@@ -34,7 +34,7 @@ macro "Panning" {
 	inW = getWidth();
 	inH = getHeight();
 	bd = bitDepth();
-	if (bd != 24) inType = bd + "-bit";
+	if (bd != 24) inType = ""+ bd + "-bit";
 	else inType = "RGB";
 
 	// Dialog box
