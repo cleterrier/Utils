@@ -1,11 +1,12 @@
 // Panning macro by Christophe Leterrier
 // v1.0 09/05/2020
+// v1.1 17/05/2020 with quadratic and logistic panning
 // Generate a stack of a zoomed window along a polyline ROI
 // 1. Draw a polyline ROI on an image
 // 2. Launch the macro
 // 3. Dialog: Specify the width and height of the zoom window, as well as the number of steps for the progression along the path (in pixels)
 // 4. Dialog Option: smoothing of the path (spline fit)
-// 5. Dialog Option: choose linear or quadratic panning
+// 5. Dialog Option: choose linear, quadratic or logistic (with sharpness parameter) panning
 // 6. Dialog Option: output stack of the original image with a moving zoom box, unscaled (can generate a large file), scale to the window width, or to the window height
 // The zoom box is added as an ImageJ overlay (use Image>Overlay>Overlay Options to change color/thickness and Image>Overlay>Flatten to burn into image)
 // The path and all zoom boxes are also added on the original image as an overlay (use Image>Overlay>Remove Overlay to remove)
@@ -24,8 +25,10 @@ macro "Panning" {
 	// smooth the line ROI?
 	spline_def = true;
 	// panning type by default: quadratic
-	pType_choice = newArray("linear", "quadratic");
+	pType_choice = newArray("linear", "quadratic", "logistic");
 	pType_def = "quadratic"
+	// Default sharpness for logistic panning
+	sharp_def = 1.5;
 	// add the original image as a stack with a moving zoom box?
 	oriOut_def = true;
 	// Sizing of this original image stack
@@ -48,6 +51,7 @@ macro "Panning" {
 	Dialog.addNumber("Number of panning steps along path", nsteps_def, 0, 5,"steps");
 	Dialog.addCheckbox("Smooth path", spline_def);
 	Dialog.addChoice("Panning Type", pType_choice, pType_def);
+	Dialog.addNumber("Logistic sharpness", sharp_def, 1, 5, "");
 	Dialog.addCheckbox("Generate zoom box animation on original image", oriOut_def);
 	Dialog.addChoice("Scale original image to", oriScale_choice, oriScale_def);
 	Dialog.show();
@@ -56,6 +60,7 @@ macro "Panning" {
 	nsteps = Dialog.getNumber();
 	spline = Dialog.getCheckbox();
 	pType = Dialog.getChoice();
+	k = Dialog.getNumber();
 	oriOut = Dialog.getCheckbox();
 	oriScale = Dialog.getChoice();
 
@@ -146,9 +151,17 @@ macro "Panning" {
 			else f = 1 - ((-2*x+2)*(-2*x+2))/2;
 		}
 
+		// logistic sharpness case see https://hackernoon.com/ease-in-out-the-sigmoid-factory-c5116d8abce9
+		if (pType == "logistic") {
+			s1 = 1.0/(1.0 + Math.exp(-k)) - 0.5;
+			s2 = 1.0/(1.0 + Math.exp(-k * (2*x-1))) - 0.5;
+			f = (0.5 / s1) * s2 + 0.5;			
+		}
+
 		// index along coordinates arrays picked at the easing variable step
 		i = floor(coorLength * f);
-		// egde case at the end of tracing
+		// egde case at the ends of tracing
+		if (i == -1) i = 0;
 		if (i == coorLength) i = coorLength-1;
 			
 		// coordinates of the window rectangle ROI upper corner
