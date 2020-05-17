@@ -3,9 +3,10 @@
 // Generate a stack of a zoomed window along a polyline ROI
 // 1. Draw a polyline ROI on an image
 // 2. Launch the macro
-// 3. Dialog: Specify the width and height of the zoom window, as well as the step for the progression along the path (in pixels)
+// 3. Dialog: Specify the width and height of the zoom window, as well as the number of steps for the progression along the path (in pixels)
 // 4. Dialog Option: smoothing of the path (spline fit)
-// 5. Dialog Option: output stack of the original image with a moving zoom box, unscaled (can generate a large file), scale to the window width, or to the window height
+// 5. Dialog Option: choose linear or quadratic panning
+// 6. Dialog Option: output stack of the original image with a moving zoom box, unscaled (can generate a large file), scale to the window width, or to the window height
 // The zoom box is added as an ImageJ overlay (use Image>Overlay>Overlay Options to change color/thickness and Image>Overlay>Flatten to burn into image)
 // The path and all zoom boxes are also added on the original image as an overlay (use Image>Overlay>Remove Overlay to remove)
 
