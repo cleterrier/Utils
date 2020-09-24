@@ -131,7 +131,7 @@ macro "Panning" {
 		selectImage(tempID);
 		close();
 	}
-	
+
 	for (p = 0; p < nsteps; p++) {
 
 		// select source image
@@ -143,7 +143,7 @@ macro "Panning" {
 		// output easing variable from 0 to 1
 		// linear case
 		if (pType == "linear") {
-			f = x);
+			f = x;
 		}
 		// quadratic case see https://easings.net/#easeInOutQuad
 		if (pType == "quadratic") {
@@ -155,7 +155,7 @@ macro "Panning" {
 		if (pType == "logistic") {
 			s1 = 1.0/(1.0 + Math.exp(-k)) - 0.5;
 			s2 = 1.0/(1.0 + Math.exp(-k * (2*x-1))) - 0.5;
-			f = (0.5 / s1) * s2 + 0.5;			
+			f = (0.5 / s1) * s2 + 0.5;
 		}
 
 		// index along coordinates arrays picked at the easing variable step
@@ -163,7 +163,7 @@ macro "Panning" {
 		// egde case at the ends of tracing
 		if (i == -1) i = 0;
 		if (i == coorLength) i = coorLength-1;
-			
+
 		// coordinates of the window rectangle ROI upper corner
 		wx = xpoints[i] - rw/2;
 		wy = ypoints[i] - rh/2;
