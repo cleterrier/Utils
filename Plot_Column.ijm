@@ -10,6 +10,9 @@
 
 macro "Plot_Column" {
 
+	sep = ","; // csv
+//	sep = "\t"; // tab delimited
+
 	Path = File.openDialog("Choose a tab-delimited text file / Results table");
 	PathComp = split(Path, File.separator);
 	TableName = PathComp[PathComp.length - 1];
@@ -140,6 +143,7 @@ macro "Plot_Column" {
 	
 	if (autoX == true) {
 		Array.getStatistics(XCol, XminA, XmaxA, mean, stdDev);
+		Xmin = XminA;
 		Xmax = XmaxA;
 	}
 	if (autoY == true) {
@@ -168,12 +172,12 @@ macro "Plot_Column" {
 }
 
 function getLabels(Rows) {
-	Labels = split(Rows[0], "\t");
+	Labels = split(Rows[0], sep);
 	return Labels;	
 }
 
 function getColumnNum(Rows, Label) {
-	Labels = split(Rows[0], "\t");
+	Labels = split(Rows[0], sep);
 	IndexCol = -1;
 	for (i = 0; i < Labels.length; i++) {
 		if (Labels[i] == Label) {
@@ -183,7 +187,7 @@ function getColumnNum(Rows, Label) {
 	if (IndexCol == -1) exit("Column doesn't exist !");
 	Column = newArray(Rows.length - 1);
 	for (i = 1; i < Rows.length; i++) {
-		CurrentLine = split(Rows[i], "\t");
+		CurrentLine = split(Rows[i], sep);
 		Column[i - 1] = parseFloat(CurrentLine[IndexCol]);
 	}
 	return Column;
